@@ -7,48 +7,43 @@ from fabric.api import local, run, env, put
 from os.path import exists
 env.hosts = ['54.237.85.149', '52.91.127.145']
 
-
 def do_pack():
-    """The function creates the compressed archive in the naming
-    format web_static_<year><month><day><hour><minute><second>.tgz
-    """
+    """generates a tgz archive"""
     try:
-        now = datetime.datetime.now()
-        now = now.strftime("%Y%m%d%H%M%S")
-        local("mkdir -p versions")
-        name = "versions/web_static_{}.tgz".format(now)
-        local("tar -cvzf {} web_static".format(name))
-        return name
-    except Exception:
+        date = datetime.now().strftime("%Y%m%d%H%M%S")
+        if isdir("versions") is False:
+            local("mkdir versions")
+        file_name = "versions/web_static_{}.tgz".format(date)
+        local("tar -cvzf {} web_static".format(file_name))
+        return file_name
+    except:
         return None
 
 
 def do_deploy(archive_path):
-    """The function do_deploy which distributes an archive
-    to my web servers"""
+    """distributes an archive to the web servers"""
     if exists(archive_path) is False:
         return False
     try:
-        name = archive_path.split('/')[-1]
-        put(archive_path, '/tmp/{}'.format(name))
-        spl = name.split('.')[0]
-        run('mkdir -p /data/web_static/releases/{}/'.format(spl))
-        dis = '/data/web_static/releases/{}/'.format(spl)
-        c = 'tar -xzf'
-        run('{} /tmp/{} -C /data/web_static/releases/{}/'.format(c, name, spl))
-        run('rm /tmp/{}'.format(name))
-        run('mv /data/web_static/releases/{}/web_static/* {}'.format(spl, dis))
-        run('rm -rf /data/web_static/releases/{}/web_static'.format(spl))
+        file_n = archive_path.split("/")[-1]
+        no_ext = file_n.split(".")[0]
+        path = "/data/web_static/releases/"
+        put(archive_path, '/tmp/')
+        run('mkdir -p {}{}/'.format(path, no_ext))
+        run('tar -xzf /tmp/{} -C {}{}/'.format(file_n, path, no_ext))
+        run('rm /tmp/{}'.format(file_n))
+        run('mv {0}{1}/web_static/* {0}{1}/'.format(path, no_ext))
+        run('rm -rf {}{}/web_static'.format(path, no_ext))
         run('rm -rf /data/web_static/current')
-        run('ln -s {} /data/web_static/current'.format(dis))
+        run('ln -s {}{}/ /data/web_static/current'.format(path, no_ext))
         return True
-    except Exception:
+    except:
         return False
 
 
 def deploy():
-    """This function carries out the full deployment"""
-    file_path = do_pack()
-    if file_path is None:
+    """creates and distributes an archive to the web servers"""
+    archive_path = do_pack()
+    if archive_path is None:
         return False
-    return do_deploy(file_path)
+    return do_deploy(archive_path)

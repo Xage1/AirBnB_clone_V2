@@ -1,21 +1,23 @@
 #!/usr/bin/python3
-"""This module createscompressed archive file of in
-    directory named web_static"""
+"""
+Fabric script to genereate tgz archive
+execute: fab -f 1-pack_web_static.py do_pack
+"""
 
-import datetime
-from fabric.api import local
+from datetime import datetime
+from fabric.api import *
 
 
 def do_pack():
-    """The function creates the compressed archive in the naming
-        format web_static_<year><month><day><hour><minute><second>.tgz
     """
-    try:
-        now = datetime.datetime.now()
-        now = now.strftime("%Y%m%d%H%M%S")
-        local("mkdir -p versions")
-        name = "versions/web_static_{}.tgz".format(now)
-        local("tar -cvzf {} web_static".format(name))
-        return name
-    except Exception:
+    making an archive on web_static folder
+    """
+
+    time = datetime.now()
+    archive = 'web_static_' + time.strftime("%Y%m%d%H%M%S") + '.' + 'tgz'
+    local('mkdir -p versions')
+    create = local('tar -cvzf versions/{} web_static'.format(archive))
+    if create is not None:
+        return archive
+    else:
         return None
