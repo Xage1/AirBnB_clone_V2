@@ -1,15 +1,16 @@
 #!/usr/bin/python3
-"""
-deploy archive
-"""
+"""This module distributes an archive to my web servers
+    using the function do_deploy"""
+
 import datetime
 from fabric.api import local, run, env, put
 from os.path import exists
-env.hosts = ['54.88.43.0', '18.235.249.83']
+env.hosts = ['54.237.85.149', '52.91.127.145']
 
 
 def do_deploy(archive_path):
-    """deploy the archive"""
+    """The function do_deploy which distributes an archive
+    to my web servers"""
     if exists(archive_path) is False:
         return False
     try:
